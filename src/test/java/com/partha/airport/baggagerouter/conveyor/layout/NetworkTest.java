@@ -2,12 +2,9 @@ package com.partha.airport.baggagerouter.conveyor.layout;
 
 import org.junit.Assert;
 import org.junit.Test;
-import sun.nio.ch.Net;
 
 import java.util.Collection;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by psarkar on 4/3/2015.
