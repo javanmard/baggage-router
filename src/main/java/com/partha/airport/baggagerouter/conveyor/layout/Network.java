@@ -26,7 +26,7 @@ public class Network
    @PostConstruct
    public void init() throws IOException, URISyntaxException
    {
-      LOG.info("Initializing......");
+      LOG.info("Initializing.......");
       Files.lines(Paths.get(this.getClass().getClassLoader().getResource(CONVEYOR_SYSTEM_LIST_FILE).toURI()))
            .filter(line -> !line.startsWith("#"))
            .map(line -> line.split(" "))
