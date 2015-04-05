@@ -1,5 +1,6 @@
 package com.partha.airport.baggagerouter.conveyor.layout;
 
+import com.partha.airport.baggagerouter.conveyor.exception.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,18 +28,24 @@ public class Network
    public void init() throws IOException, URISyntaxException
    {
       LOG.info("Initializing.......");
-      Files.lines(Paths.get(this.getClass().getClassLoader().getResource(CONVEYOR_SYSTEM_LIST_FILE).toURI()))
-           .filter(line -> !line.startsWith("#"))
-           .map(line -> line.split(" "))
-           .forEach(tokens -> addConveyorSegment(tokens[0], tokens[1], tokens[2]));
-      LOG.info("..... Done");
+      try
+      {
+         Files.lines(Paths.get(this.getClass().getClassLoader().getResource(CONVEYOR_SYSTEM_LIST_FILE).toURI()))
+              .filter(line -> !line.startsWith("#")).map(line -> line.split(" "))
+              .forEach(tokens -> addConveyorSegment(tokens[0], tokens[1], tokens[2]));
+      }
+      catch (Exception e)
+      {
+         throw new ConfigurationException("Unable to find or parse file: " + CONVEYOR_SYSTEM_LIST_FILE, e);
+      }
+         LOG.info("..... Done");
    }
 
    /**
     * Adds a conveyor segment. This is meant to bea used only during initializatio
-    * @param node1Name
-    * @param node2Name
-    * @param travelTimeStr
+    * @param node1Name node name
+    * @param node2Name node name
+    * @param travelTimeStr travel time between node1 & node2
     */
    public void addConveyorSegment(String node1Name, String node2Name, String travelTimeStr)
    {
@@ -114,72 +121,4 @@ public class Network
       Collections.reverse(shortestPath);
       return shortestPath;
    }
-
-//   public static void main(String[] args)
-//   {
-//      Node v1 = NodeFactory.getFlightGate("A1");
-//      Node v2 = NodeFactory.getFlightGate("A2");
-//      Node v3 = NodeFactory.getFlightGate("A3");
-//      Node v4 = NodeFactory.getFlightGate("A4");
-//      Node v5 = NodeFactory.getFlightGate("A5");
-//      Node v6 = NodeFactory.getFlightGate("A6");
-//      Node v7 = NodeFactory.getFlightGate("A7");
-//      Node v8 = NodeFactory.getFlightGate("A8");
-//      Node v9 = NodeFactory.getFlightGate("A9");
-//      Node v10 = NodeFactory.getFlightGate("A10");
-//      Node vTicketing = NodeFactory.getFlightGate("Ticketing");
-////      Node vBaggageClaim = NodeFactory.getFlightGate("BaggageClaim");
-//
-//      DepartureList departureList = new DepartureList();
-//      departureList.addDeparture("UA10", v1, "MIA", new GregorianCalendar(2015, 2, 23, 8, 0).getTime());
-//      departureList.addDeparture("UA11", v1, "LAX", new GregorianCalendar(2015, 2, 23, 9, 0).getTime());
-//      departureList.addDeparture("UA12", v1, "JFK", new GregorianCalendar(2015, 2, 23, 9, 45).getTime());
-//      departureList.addDeparture("UA13", v2, "JFK", new GregorianCalendar(2015, 2, 23, 8, 30).getTime());
-//      departureList.addDeparture("UA14", v2, "JFK", new GregorianCalendar(2015, 2, 23, 9, 45).getTime());
-//      departureList.addDeparture("UA15", v2, "JFK", new GregorianCalendar(2015, 2, 23, 10, 0).getTime());
-//      departureList.addDeparture("UA16", v3, "JFK", new GregorianCalendar(2015, 2, 23, 9, 0).getTime());
-//      departureList.addDeparture("UA17", v4, "MHT", new GregorianCalendar(2015, 2, 23, 9, 15).getTime());
-//      departureList.addDeparture("UA18", v5, "LAX", new GregorianCalendar(2015, 2, 23, 10, 15).getTime());
-//
-//      Network network = new Network();
-//      network.addConveyorSegment(vTicketing, v5, 5);
-//      network.addConveyorSegment(v5, departureList.findDepartureByFlightId(DepartureList.ARRIVAL)
-//                                                  .getFlightGate(), 5);
-//      network.addConveyorSegment(v5, v10, 4);
-//      network.addConveyorSegment(v5, v1, 6);
-//      network.addConveyorSegment(v1, v2, 1);
-//      network.addConveyorSegment(v2, v3, 1);
-//      network.addConveyorSegment(v3, v4, 1);
-//      network.addConveyorSegment(v10, v9, 1);
-//      network.addConveyorSegment(v9, v8, 1);
-//      network.addConveyorSegment(v8, v7, 1);
-//      network.addConveyorSegment(v7, v6, 1);
-//
-//      printShortestPath(network.computeShortestPath(vTicketing, departureList.findDepartureByFlightId("UA12")
-//                                                                             .getFlightGate()));
-//      printShortestPath(network.computeShortestPath(v5, departureList.findDepartureByFlightId("UA17")
-//                                                                     .getFlightGate()));
-//      printShortestPath(network.computeShortestPath(v2, departureList.findDepartureByFlightId("UA10")
-//                                                                     .getFlightGate()));
-//      printShortestPath(network.computeShortestPath(v8, departureList.findDepartureByFlightId("UA18")
-//                                                                     .getFlightGate()));
-//      printShortestPath(network.computeShortestPath(v7, departureList
-//              .findDepartureByFlightId(DepartureList.ARRIVAL).getFlightGate()));
-//   }
-//
-//   private static void printShortestPath(List<Node> shortestPath)
-//   {
-//      Node source = shortestPath.get(0);
-//      Node target = shortestPath.get(shortestPath.size() - 1);
-//
-//      System.out.println("Distance from: " + source.getName() + " to " + target.getName() + ": " + target
-//              .getMinTravelTime() + ", length: " + shortestPath.size());
-//
-//      for (Node interimNode : shortestPath)
-//      {
-//         System.out.print(interimNode.getName() + " -> ");
-//      }
-//      System.out.println();
-//      System.out.println();
-//   }
 }

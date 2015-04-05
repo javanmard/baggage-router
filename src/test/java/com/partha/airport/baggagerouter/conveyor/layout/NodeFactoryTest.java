@@ -1,10 +1,8 @@
 package com.partha.airport.baggagerouter.conveyor.layout;
 
-import com.partha.airport.baggagerouter.conveyor.exception.ConveyorException;
+import com.partha.airport.baggagerouter.conveyor.exception.UnknownNodeException;
 import org.junit.Assert;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by psarkar on 4/3/2015.
@@ -12,35 +10,21 @@ import static org.junit.Assert.*;
 public class NodeFactoryTest
 {
 
-   @Test(expected = ConveyorException.class)
+   @Test(expected = UnknownNodeException.class)
    public void testGetBadNode() throws Exception
    {
-      NodeFactory nodeFactory = new NodeFactory();
-      nodeFactory.getNode("AAAA", true);
+      NodeFactory.getNode("AAAA", false);
    }
 
    @Test
    public void testGetGoodNode() throws Exception
    {
       String nodeName = "AAA";
-      NodeFactory nodeFactory = new NodeFactory();
-      nodeFactory.getNode(nodeName, true);//, "AAA");
-      Node node = nodeFactory.getNode(nodeName, true);
-      Assert.assertEquals(nodeName, node.getName());
-   }
-
-   @Test
-   public void testCreateNode() throws Exception
-   {
-      String nodeName = "AAA";
-      NodeFactory nodeFactory = new NodeFactory();
-      nodeFactory.getNode(nodeName, true);//, "AAA");
-      Node node = nodeFactory.getNode(nodeName, true);
+      Node node = NodeFactory.getNode(nodeName, true);
       Assert.assertEquals(nodeName, node.getName());
 
       nodeName = "BBB";
-      nodeFactory.getNode(nodeName, true);//, "BBB");
-      node = nodeFactory.getNode(nodeName, true);
+      node = NodeFactory.getNode(nodeName, true);
       Assert.assertEquals(nodeName, node.getName());
    }
 }
