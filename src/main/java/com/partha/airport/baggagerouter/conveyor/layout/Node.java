@@ -29,7 +29,7 @@ public class Node implements Comparable<Node>
    @Override
    public int compareTo(Node otherNode)
    {
-      return Integer.compare(getMinTravelTime(), otherNode.getMinTravelTime());
+      return Integer.compare(minTravelTime, otherNode.minTravelTime);
    }
 
    public void reset()
@@ -74,6 +74,30 @@ public class Node implements Comparable<Node>
    }
 
    @Override
+   public boolean equals(Object o)
+   {
+      if (this == o)
+      {
+         return true;
+      }
+      if (o == null || getClass() != o.getClass())
+      {
+         return false;
+      }
+
+      Node node = (Node) o;
+
+      return name.equals(node.name);
+
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return name.hashCode();
+   }
+
+   @Override
    public String toString()
    {
       return "Node{" +
@@ -86,7 +110,7 @@ public class Node implements Comparable<Node>
 
    private String getAdjacentSegmentTargets()
    {
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       for(Segment segment: segments)
       {
          sb.append(segment.getTarget().getName()).append(", ");

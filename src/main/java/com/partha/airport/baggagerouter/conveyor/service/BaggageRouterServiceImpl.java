@@ -30,6 +30,12 @@ public class BaggageRouterServiceImpl implements BaggageRouterService
    @Autowired
    Network network;
 
+   /**
+    * Shortest path from source to flight id (flight id is located at some target node).
+    * @param sourceName
+    * @param flightId
+    * @return
+    */
    @Override
    public List<NodeDTO> findShortestPath(String sourceName, String flightId)
    {

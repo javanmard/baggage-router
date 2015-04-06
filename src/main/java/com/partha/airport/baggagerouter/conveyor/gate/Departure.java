@@ -17,12 +17,12 @@ public class Departure
 
    private Date time;
 
-   public Departure(String flightId, Node flightGate, String destination, Date time)
+   public Departure(String flightId, Node flightGate, String destination, Date tTime)
    {
       this.flightId = flightId;
       this.flightGate = flightGate;
       this.destination = destination;
-      this.time = time;
+      this.time = (tTime != null) ? new Date(tTime.getTime()) : null;
    }
 
    public String getFlightId()
@@ -57,11 +57,11 @@ public class Departure
 
    public Date getTime()
    {
-      return time;
+      return new Date(time.getTime());
    }
 
-   public void setTime(Date time)
+   public void setTime(Date tTime)
    {
-      this.time = time;
+      this.time = (tTime != null) ? new Date(tTime.getTime()) : null;
    }
 }

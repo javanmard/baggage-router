@@ -19,7 +19,7 @@ public class NetworkTest
 
       String node1Name = "AAA";
       String node2Name = "BBB";
-      network.addConveyorSegment(node1Name, node2Name, "15");
+      network.addConveyorSegment(node1Name, node2Name, 15);
       Assert.assertEquals(node1Name, network.getNode(node1Name).getName());
       Assert.assertEquals(node2Name, network.getNode(node2Name).getName());
    }
@@ -34,19 +34,19 @@ public class NetworkTest
       String node2Name = "BBB";
       String node3Name = "CCC";
       String node4Name = "DDD";
-      network.addConveyorSegment(node1Name, node2Name, "15");
+      network.addConveyorSegment(node1Name, node2Name, 15);
       Collection<Node> allNodes = network.getAllNodes();
       Assert.assertEquals(2, allNodes.size());
-      network.addConveyorSegment(node1Name, node3Name, "20");
+      network.addConveyorSegment(node1Name, node3Name, 20);
       allNodes = network.getAllNodes();
       Assert.assertEquals(3, allNodes.size());
-      network.addConveyorSegment(node2Name, node3Name, "30");
+      network.addConveyorSegment(node2Name, node3Name, 30);
       allNodes = network.getAllNodes();
       Assert.assertEquals(3, allNodes.size());
-      network.addConveyorSegment(node3Name, node4Name, "10");
+      network.addConveyorSegment(node3Name, node4Name, 10);
       allNodes = network.getAllNodes();
       Assert.assertEquals(4, allNodes.size());
-      network.addConveyorSegment(node4Name, node1Name, "3");
+      network.addConveyorSegment(node4Name, node1Name, 3);
       allNodes = network.getAllNodes();
       Assert.assertEquals(4, allNodes.size());
 
@@ -69,6 +69,10 @@ public class NetworkTest
       }
    }
 
+   /**
+    * perform all the shortest path tests provided in the exercise
+    * @throws Exception
+    */
    @Test
    public void testComputeShortestPath() throws Exception
    {
@@ -87,17 +91,17 @@ public class NetworkTest
       String a8 = "A8";
       String a9 = "A9";
       String a10 = "A10";
-      network.addConveyorSegment(cat, a5, "5");
-      network.addConveyorSegment(a5, bc, "5");
-      network.addConveyorSegment(a5, a10, "4");
-      network.addConveyorSegment(a5, a1, "6");
-      network.addConveyorSegment(a1, a2, "1");
-      network.addConveyorSegment(a2, a3, "1");
-      network.addConveyorSegment(a3, a4, "1");
-      network.addConveyorSegment(a10, a9, "1");
-      network.addConveyorSegment(a9, a8, "1");
-      network.addConveyorSegment(a8, a7, "1");
-      network.addConveyorSegment(a7, a6, "1");
+      network.addConveyorSegment(cat, a5, 5);
+      network.addConveyorSegment(a5, bc, 5);
+      network.addConveyorSegment(a5, a10, 4);
+      network.addConveyorSegment(a5, a1, 6);
+      network.addConveyorSegment(a1, a2, 1);
+      network.addConveyorSegment(a2, a3, 1);
+      network.addConveyorSegment(a3, a4, 1);
+      network.addConveyorSegment(a10, a9, 1);
+      network.addConveyorSegment(a9, a8, 1);
+      network.addConveyorSegment(a8, a7, 1);
+      network.addConveyorSegment(a7, a6, 1);
 
       Collection<Node> allNodes = network.getAllNodes();
       Assert.assertEquals(12, allNodes.size());

@@ -1,15 +1,11 @@
 package com.partha.airport.baggagerouter.conveyor.dto;
 
-import org.hibernate.validator.constraints.NotBlank;
-
-import javax.validation.constraints.NotNull;
-
 /**
  * Created by psarkar on 4/3/2015.
  */
 public class NodeDTO
 {
-   @NotBlank private String name;
+   private String name;
 
    public String getName()
    {
@@ -37,7 +33,6 @@ public class NodeDTO
       NodeDTO nodeDTO = (NodeDTO) o;
 
       return name.equals(nodeDTO.name);
-
    }
 
    @Override
