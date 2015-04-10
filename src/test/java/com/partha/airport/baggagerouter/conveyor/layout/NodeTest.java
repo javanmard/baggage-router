@@ -78,10 +78,22 @@ public class NodeTest
    }
 
    @Test
-   public void getDescription() throws Exception
+   public void testGetDescription() throws Exception
    {
       String description = "A Description";
       Node node = new Node("A", description);
       Assert.assertEquals(description, node.getDescription());
+   }
+
+   @Test
+   public void testEquals()
+   {
+      Node node1 = new Node("A", "Node A Description");
+      Node node2 = new Node("B", "Node B Description");
+      Node node3 = new Node("A", "Node C Description");
+      Assert.assertNotEquals(node1, node2);
+      Assert.assertEquals(node1, node3);
+      Assert.assertNotEquals(node1, "A");
+
    }
 }

@@ -1,16 +1,15 @@
 package com.partha.airport.baggagerouter.conveyor;
 
-import com.partha.airport.baggagerouter.conveyor.dto.DepartureDTO;
 import com.partha.airport.baggagerouter.conveyor.dto.NodeDTO;
-import com.partha.airport.baggagerouter.conveyor.gate.DepartureList;
-import com.partha.airport.baggagerouter.conveyor.persistence.DepartureRepoService;
 import com.partha.airport.baggagerouter.conveyor.service.BaggageRouterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -24,17 +23,10 @@ public class RouterController
 
    private final BaggageRouterService baggageRouterService;
 
-   private final DepartureRepoService departureRepoService;
-
-   private final DepartureList departureList;
-
    @Autowired
-   public RouterController(BaggageRouterService baggageRouterService, DepartureRepoService departureRepoService,
-                           DepartureList departureList)
+   public RouterController(BaggageRouterService baggageRouterService)
    {
       this.baggageRouterService = baggageRouterService;
-      this.departureRepoService = departureRepoService;
-      this.departureList = departureList;
    }
 
    @RequestMapping(value = "{source}/{flightId}", method = RequestMethod.GET)
@@ -44,17 +36,5 @@ public class RouterController
       List<NodeDTO> route = baggageRouterService.findShortestPath(source, flightId);
       LOG.info("Returning: {}", route);
       return route;
-   }
-
-   @RequestMapping(method = RequestMethod.PUT)
-   DepartureDTO createOrUpdate(@RequestBody @Valid DepartureDTO departure)
-   {
-      LOG.info("Updating departure: {}", departure);
-
-      DepartureDTO updated = departureRepoService.createOrUpdate(departure);
-      departureList.addDeparture(departure);
-      LOG.info("Updated departure: {}", updated);
-
-      return updated;
    }
 }

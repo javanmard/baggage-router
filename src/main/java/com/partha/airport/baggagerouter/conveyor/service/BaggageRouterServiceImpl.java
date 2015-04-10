@@ -31,6 +31,7 @@ public class BaggageRouterServiceImpl implements BaggageRouterService
 
    /**
     * Shortest path from source node to flight id (whichever node/gate it is located at).
+    *
     * @param sourceName
     * @param flightId
     * @return shortest path through the conveyor system
@@ -39,7 +40,7 @@ public class BaggageRouterServiceImpl implements BaggageRouterService
    public List<NodeDTO> findShortestPath(String sourceName, String flightId)
    {
       List<NodeDTO> shortestPathDTOs = new ArrayList<>();
-      if(!StringUtils.isEmpty(sourceName) && !StringUtils.isEmpty(flightId))
+      if (!StringUtils.isEmpty(sourceName) && !StringUtils.isEmpty(flightId))
       {
          Node source = NodeFactory.getNode(sourceName, false);
          Node target = departureList.findEndNodeByFlightId(flightId);

@@ -3,9 +3,9 @@ package com.partha.airport.baggagerouter.conveyor.exception;
 /**
  * Created by psarkar on 4/4/2015.
  */
-public class UnknownFlightGateException extends RuntimeException
+public class UnknownFlightIdException extends RuntimeException
 {
-   public UnknownFlightGateException(String message)
+   public UnknownFlightIdException(String message)
    {
       super(message);
    }

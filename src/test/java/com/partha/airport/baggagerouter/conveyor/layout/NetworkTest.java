@@ -1,5 +1,7 @@
 package com.partha.airport.baggagerouter.conveyor.layout;
 
+import com.partha.airport.baggagerouter.conveyor.exception.ConfigurationException;
+import com.partha.airport.baggagerouter.conveyor.exception.UnknownNodeException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,6 +24,38 @@ public class NetworkTest
       network.addConveyorSegment(node1Name, node2Name, 15);
       Assert.assertEquals(node1Name, network.getNode(node1Name).getName());
       Assert.assertEquals(node2Name, network.getNode(node2Name).getName());
+   }
+
+   @Test(expected = ConfigurationException.class)
+   public void testAddConveyorSegmentTravelTimeZero() throws Exception
+   {
+      Network network = new Network();
+      network.getAllNodes().clear();
+
+      String node1Name = "AAA";
+      String node2Name = "BBB";
+      network.addConveyorSegment(node1Name, node2Name, 0);
+   }
+
+   @Test(expected = ConfigurationException.class)
+   public void testAddConveyorSegmentTravelTimeNegative() throws Exception
+   {
+      Network network = new Network();
+      network.getAllNodes().clear();
+
+      String node1Name = "AAA";
+      String node2Name = "BBB";
+      network.addConveyorSegment(node1Name, node2Name, -1);
+   }
+
+   @Test
+   public void testInit() throws Exception
+   {
+      Network network = new Network();
+      network.getAllNodes().clear();
+      network.init();
+      Collection<Node> allNodes = network.getAllNodes();
+      Assert.assertEquals(12, allNodes.size());
    }
 
    @Test
@@ -69,7 +103,71 @@ public class NetworkTest
       }
    }
 
-   // TBD - tests for shortest path between unknown nodes.
+   @Test(expected = UnknownNodeException.class)
+   public void testComputeShortestPathNullSource()
+   {
+      Network network = new Network();
+      network.getAllNodes().clear();
+
+      String cat = "Concourse_A_Ticketing";
+      String bc = "BaggageClaim";
+      String a1 = "A1";
+      String a2 = "A2";
+      String a3 = "A3";
+      String a4 = "A4";
+      String a5 = "A5";
+      String a6 = "A6";
+      String a7 = "A7";
+      String a8 = "A8";
+      String a9 = "A9";
+      String a10 = "A10";
+      network.addConveyorSegment(cat, a5, 5);
+      network.addConveyorSegment(a5, bc, 5);
+      network.addConveyorSegment(a5, a10, 4);
+      network.addConveyorSegment(a5, a1, 6);
+      network.addConveyorSegment(a1, a2, 1);
+      network.addConveyorSegment(a2, a3, 1);
+      network.addConveyorSegment(a3, a4, 1);
+      network.addConveyorSegment(a10, a9, 1);
+      network.addConveyorSegment(a9, a8, 1);
+      network.addConveyorSegment(a8, a7, 1);
+      network.addConveyorSegment(a7, a6, 1);
+
+      network.computeShortestPath(null, network.getNode(a1));
+   }
+
+   @Test(expected = UnknownNodeException.class)
+   public void testComputeShortestPathNullTarget()
+   {
+      Network network = new Network();
+      network.getAllNodes().clear();
+
+      String cat = "Concourse_A_Ticketing";
+      String bc = "BaggageClaim";
+      String a1 = "A1";
+      String a2 = "A2";
+      String a3 = "A3";
+      String a4 = "A4";
+      String a5 = "A5";
+      String a6 = "A6";
+      String a7 = "A7";
+      String a8 = "A8";
+      String a9 = "A9";
+      String a10 = "A10";
+      network.addConveyorSegment(cat, a5, 5);
+      network.addConveyorSegment(a5, bc, 5);
+      network.addConveyorSegment(a5, a10, 4);
+      network.addConveyorSegment(a5, a1, 6);
+      network.addConveyorSegment(a1, a2, 1);
+      network.addConveyorSegment(a2, a3, 1);
+      network.addConveyorSegment(a3, a4, 1);
+      network.addConveyorSegment(a10, a9, 1);
+      network.addConveyorSegment(a9, a8, 1);
+      network.addConveyorSegment(a8, a7, 1);
+      network.addConveyorSegment(a7, a6, 1);
+
+      network.computeShortestPath(network.getNode(a1), null);
+   }
 
    /**
     * perform all the shortest path tests provided in the exercise

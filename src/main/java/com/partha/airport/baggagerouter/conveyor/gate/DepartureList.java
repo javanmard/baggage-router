@@ -3,13 +3,11 @@ package com.partha.airport.baggagerouter.conveyor.gate;
 import com.partha.airport.baggagerouter.conveyor.dto.DepartureDTO;
 import com.partha.airport.baggagerouter.conveyor.exception.ConfigurationException;
 import com.partha.airport.baggagerouter.conveyor.exception.DepartureException;
-import com.partha.airport.baggagerouter.conveyor.exception.UnknownFlightGateException;
+import com.partha.airport.baggagerouter.conveyor.exception.UnknownFlightIdException;
 import com.partha.airport.baggagerouter.conveyor.layout.Node;
 import com.partha.airport.baggagerouter.conveyor.layout.NodeFactory;
-import com.partha.airport.baggagerouter.conveyor.persistence.DepartureRepoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -20,7 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,14 +50,11 @@ public class DepartureList
    private static int DESTINATION_INDEX = 2;
    private static int DEPARTURE_TIME_INDEX = 3;
 
-   @Autowired
-   DepartureRepoService departureRepoService;
-
-
    /**
     * This method is meant as an initializer in the context of the exercise.
     * In a production/real world scenario, we'd likely only have the REST API to add departures, which would be invoked
     * by another service/ui, whenever a new departure is scheduled at the airport.
+    *
     * @throws IOException
     * @throws URISyntaxException
     */
@@ -68,16 +66,17 @@ public class DepartureList
          LOG.info("Initializing......");
          Files.lines(Paths.get(this.getClass().getClassLoader().getResource(DEPARTURE_LIST_FILE).toURI()))
               .filter(line -> !line.startsWith("#")).map(line -> line.split(" "))
-              .forEach(tokens -> addDepartureFromFile(tokens[FLIGHT_ID_INDEX], tokens[FLIGHT_GATE_INDEX],
+              .forEach(tokens -> addDeparture(tokens[FLIGHT_ID_INDEX], tokens[FLIGHT_GATE_INDEX],
                       tokens[DESTINATION_INDEX], tokens[DEPARTURE_TIME_INDEX]));
          LOG.info("..... Done");
 
-         LOG.info("Loading from DB");
-         List<DepartureDTO> allDeparturesInDb = departureRepoService.findAll();
-         allDeparturesInDb.stream()
-                 .forEach(departure -> addDeparture(new DepartureDTO(departure.getId(), departure.getFlightGate()
-                         , departure.getDestination(), departure.getDepartureTime())));
-         LOG.info("..... Done");
+         //         LOG.info("Loading from DB");
+         //         List<DepartureDTO> allDeparturesInDb = departureRepoService.findAll();
+         //         allDeparturesInDb.stream()
+         //                 .forEach(departure -> addDeparture(new DepartureDTO(departure.getId(), departure
+         // .getFlightGate()
+         //                         , departure.getDestination(), departure.getDepartureTime())));
+         //         LOG.info("..... Done");
       }
       catch (Exception e)
       {
@@ -88,6 +87,7 @@ public class DepartureList
    /**
     * This is meant to be called only in the context of an initialization for the exercise. It shouldn't be needed in a
     * real world scenario.
+    *
     * @param flightId         flight id
     * @param flightGateName   gate name
     * @param destination      destination airport
@@ -95,11 +95,10 @@ public class DepartureList
     *                         TBD: not dealing with next day flights here
     * @return
     */
-   public boolean addDepartureFromFile(String flightId, String flightGateName, String destination, String departureTimeStr)
+   public boolean addDeparture(String flightId, String flightGateName, String destination, String departureTimeStr)
    {
       LOG.info("Checking departure: {}, {}, {}, {}. Total departures: {}", flightId, flightGateName, destination,
-              departureTimeStr, departures
-              .size());
+              departureTimeStr, departures.size());
       checkFlightId(flightId);
       checkFlightGate(flightGateName);
       checkDestination(destination);
@@ -109,16 +108,17 @@ public class DepartureList
       Date departureTime = constructFlightDateTime(departureTimeStr);
       Departure departure = new Departure(flightId, flightGate, destination, departureTime);
       departures.put(flightId, departure);
-      Optional<DepartureDTO> departureDTO = departureRepoService.findByFlightId(flightId);
-      departureDTO.orElse(departureRepoService.createOrUpdate(DepartureDTO.convertToDTO(departure)));
+      //      Optional<DepartureDTO> departureDTO = departureRepoService.findByFlightId(flightId);
+      //      departureDTO.orElse(departureRepoService.createOrUpdate(DepartureDTO.convertToDTO(departure)));
       LOG.info("Added departure: {}, {}, {}, {}. Total departures: {}", flightId, flightGateName, destination,
               departureTimeStr, departures
-              .size());
+                      .size());
       return true;
    }
 
    /**
-    * This is how I'd expect departures to be added in a real world scenario
+    * This is how I'd expect departures to be added in a real world scenario, called from the REST API
+    *
     * @param departureDTO
     * @return
     */
@@ -150,14 +150,14 @@ public class DepartureList
    }
 
    /**
-    * Finds a destination node given a fligt id
+    * Finds a destination node given a flight id
     *
-    * @param flightId input fligt id
+    * @param flightId input flight id
     * @return node where the given flight is docked
     */
    public Node findEndNodeByFlightId(String flightId)
    {
-      Node endNode = null;
+      Node endNode;
       checkFlightId(flightId);
 
       if (flightId.equals(ARRIVAL))
@@ -174,7 +174,7 @@ public class DepartureList
          }
          else
          {
-            throw new UnknownFlightGateException("Flight Id named: " + flightId + ", not found");
+            throw new UnknownFlightIdException("Flight Id named: " + flightId + ", not found");
          }
       }
       return endNode;
@@ -196,7 +196,7 @@ public class DepartureList
          flightDateTime = DATE_TIME_FORMAT.parse(flightDateTimeStr);
          // when loading from a file, we only have the time, so it's possible the time specified has already passed
          // today, so it likely means departure is tomorrow.
-         if(flightDateTime.before(new Date()))
+         if (flightDateTime.before(new Date()))
          {
             GregorianCalendar gCal = new GregorianCalendar();
             gCal.setTime(flightDateTime);
