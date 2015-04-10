@@ -1,6 +1,7 @@
 package com.partha.airport.baggagerouter.conveyor.layout;
 
 import com.partha.airport.baggagerouter.conveyor.exception.ConfigurationException;
+import com.partha.airport.baggagerouter.conveyor.exception.UnknownNodeException;
 import com.partha.airport.baggagerouter.conveyor.gate.DepartureList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,8 @@ public class Network
       {
          Files.lines(Paths.get(this.getClass().getClassLoader().getResource(CONVEYOR_SYSTEM_LIST_FILE).toURI()))
               .filter(line -> !line.startsWith("#")).map(line -> line.split(" "))
-              .forEach(tokens -> addConveyorSegment(tokens[NODE_1_INDEX], tokens[NODE_2_INDEX], Integer.parseInt(tokens[TRAVEL_TIME_INDEX])));
+              .forEach(tokens -> addConveyorSegment(tokens[NODE_1_INDEX], tokens[NODE_2_INDEX],
+                      Integer.parseInt(tokens[TRAVEL_TIME_INDEX])));
       }
       catch (Exception e)
       {
@@ -64,6 +66,7 @@ public class Network
       LOG.info("Adding conveyor segment between {}, and {}", node1Name, node2Name);
       DepartureList.checkFlightGate(node1Name);
       DepartureList.checkFlightGate(node2Name);
+      checkTravelTime(travelTime);
 
       Node node1 = NodeFactory.getNode(node1Name, true);
       Node node2 = NodeFactory.getNode(node2Name, true);
@@ -72,6 +75,18 @@ public class Network
 
       allNodes.put(node1.getName(), node1);
       allNodes.put(node2.getName(), node2);
+   }
+
+   /**
+    * In a real world application, maybe we'd have better validations requirements. Here, just a check for 0 or less.
+    * @param travelTime
+    */
+   private static void checkTravelTime(int travelTime)
+   {
+      if(travelTime <= 0)
+      {
+         throw new ConfigurationException("Invalid travel time specified: " + travelTime);
+      }
    }
 
    Node getNode(String name)
@@ -85,7 +100,7 @@ public class Network
    }
 
    /**
-    * reset the traversal status of the network, so that it can be used to find shortest pathe between another pair of
+    * reset the traversal status of the network, so that it can be used to find shortest path between another pair of
     * nodes. It resets the min distance from source to all nodes, as well as the previous node in the shortest path from
     * source to target, in the previous computation
     */
@@ -94,14 +109,25 @@ public class Network
       allNodes.values().forEach(node -> node.reset());
    }
 
+   private void checkNode(Node node) throws UnknownNodeException
+   {
+      if(node == null)
+      {
+         throw new UnknownNodeException("Node not found: " + node);
+      }
+      NodeFactory.getNode(node.getName(), false);
+   }
+
    /**
-    * Find shortest path between source and targetUses Djikstra's algorithm (with a custom short circuit).
+    * Find shortest path between source and targetUses Djikstra's algorithm.
     * @param source source node
     * @param target target node
     * @return list of nodes between the source and target
     */
    public List<Node> computeShortestPath(Node source, Node target)
    {
+      checkNode(source);
+      checkNode(target);
       LOG.info("Computing shortest path from: {}, target: {}", source.getName(), target.getName());
       reset();
       source.setMinTravelTime(0);
@@ -136,12 +162,20 @@ public class Network
             }
          }
       }
+      return extractShortestPath(source, target);
+   }
 
+   private List<Node> extractShortestPath(Node source, Node target)
+   {
       List<Node> shortestPath = new ArrayList<>();
 
-      for (Node Node = target; Node != null; Node = Node.getPrevious())
+      // when no path is found, the target will be the same as the source, so suppress it.
+      if(null != source && null != target && !target.equals(source))
       {
-         shortestPath.add(Node);
+         for (Node node = target; null != node; node = node.getPrevious())
+         {
+            shortestPath.add(node);
+         }
       }
       Collections.reverse(shortestPath);
       return shortestPath;

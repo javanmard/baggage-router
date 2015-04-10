@@ -69,6 +69,8 @@ public class NetworkTest
       }
    }
 
+   // TBD - tests for shortest path between unknown nodes.
+
    /**
     * perform all the shortest path tests provided in the exercise
     * @throws Exception

@@ -26,12 +26,20 @@ public class Node implements Comparable<Node>
       return description;
    }
 
+   /**
+    * Comparison between two nodes involves the travel time between them, from the source.
+    * @param otherNode the node to compare the travel time to.
+    * @return whether this node is shorter than the other one, when travelling from the source node.
+    */
    @Override
    public int compareTo(Node otherNode)
    {
       return Integer.compare(minTravelTime, otherNode.minTravelTime);
    }
 
+   /**
+    * reset this node to its state before it was used for any shortest path computation.
+    */
    public void reset()
    {
       minTravelTime = Integer.MAX_VALUE;

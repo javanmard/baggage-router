@@ -9,5 +9,11 @@ import java.util.List;
  */
 public interface BaggageRouterService
 {
+   /**
+    * Find shortest path through the conveyor system from the source node to the target node.
+    * @param source source node
+    * @param target target node
+    * @return list of nodes between the source and target traversing the shortest path between them.
+    */
    List<NodeDTO> findShortestPath(String source, String target);
 }

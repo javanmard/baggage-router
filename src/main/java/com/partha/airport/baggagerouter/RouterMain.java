@@ -13,10 +13,6 @@ public class RouterMain
 {
    private static final Logger LOG = LoggerFactory.getLogger(RouterMain.class);
 
-   private RouterMain()
-   {
-   }
-
    public static void main(String[] args)
    {
       LOG.info("Baggage Router Starting up.....");

@@ -25,7 +25,7 @@ public class DepartureListTest
       String departureTineStr = "09:00";
 
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateName, destination, departureTineStr);
+      departureList.addDepartureFromFile(flightId, flightGateName, destination, departureTineStr);
       Map<String, Departure> allDepartures = departureList.getAllDepartures();
       Assert.assertEquals(1, allDepartures.size());
    }
@@ -38,7 +38,7 @@ public class DepartureListTest
       String destination = "LAX";
       String departureTineStr = "09:00";
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateName, destination, departureTineStr);
+      departureList.addDepartureFromFile(flightId, flightGateName, destination, departureTineStr);
    }
 
    @Test(expected = DepartureException.class)
@@ -50,7 +50,7 @@ public class DepartureListTest
       String departureTineStr = "09:00";
 
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateSName, destination, departureTineStr);
+      departureList.addDepartureFromFile(flightId, flightGateSName, destination, departureTineStr);
    }
 
    @Test(expected = DepartureException.class)
@@ -62,7 +62,7 @@ public class DepartureListTest
       String departureTineStr = "09:00";
 
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateSName, destination, departureTineStr);
+      departureList.addDepartureFromFile(flightId, flightGateSName, destination, departureTineStr);
    }
 
    @Test(expected = DepartureException.class)
@@ -74,7 +74,7 @@ public class DepartureListTest
       String departureTineStr = null;
 
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateSName, destination, departureTineStr);
+      departureList.addDepartureFromFile(flightId, flightGateSName, destination, departureTineStr);
    }
 
    @Test(expected = DepartureException.class)
@@ -87,7 +87,7 @@ public class DepartureListTest
 
       DepartureList departureList = new DepartureList();
       System.out.println("Checking bad time format: " + departureTineStr);
-      departureList.addDeparture(flightId, flightGateSName, destination, departureTineStr);
+      departureList.addDepartureFromFile(flightId, flightGateSName, destination, departureTineStr);
    }
 
    @Test
@@ -99,8 +99,7 @@ public class DepartureListTest
       String departureTineStr = "09:00";
 
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateName, destination, departureTineStr);
-      Map<String, Departure> allDepartures = departureList.getAllDepartures();
+      departureList.addDepartureFromFile(flightId, flightGateName, destination, departureTineStr);
 
       Node departure = departureList.findEndNodeByFlightId(flightId);
       Assert.assertEquals(flightGateName, departure.getName());
@@ -115,7 +114,7 @@ public class DepartureListTest
       String departureTineStr = "09:00";
 
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateName, destination, departureTineStr);
+      departureList.addDepartureFromFile(flightId, flightGateName, destination, departureTineStr);
 
       Node departure = departureList.findEndNodeByFlightId(flightId);
       Assert.assertEquals(flightGateName, departure.getName());
@@ -131,8 +130,8 @@ public class DepartureListTest
       String departureTineStr = "09:00";
 
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateName, destination, departureTineStr);
-      departureList.addDeparture(baggageClaim, "BaggageClaim", destination, departureTineStr);
+      departureList.addDepartureFromFile(flightId, flightGateName, destination, departureTineStr);
+      departureList.addDepartureFromFile(baggageClaim, "BaggageClaim", destination, departureTineStr);
 
       Node departure = departureList.findEndNodeByFlightId(flightId);
       Assert.assertEquals(baggageClaim, departure.getName());

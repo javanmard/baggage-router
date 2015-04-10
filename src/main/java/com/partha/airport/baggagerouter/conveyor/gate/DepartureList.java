@@ -1,27 +1,26 @@
 package com.partha.airport.baggagerouter.conveyor.gate;
 
+import com.partha.airport.baggagerouter.conveyor.dto.DepartureDTO;
 import com.partha.airport.baggagerouter.conveyor.exception.ConfigurationException;
 import com.partha.airport.baggagerouter.conveyor.exception.DepartureException;
 import com.partha.airport.baggagerouter.conveyor.exception.UnknownFlightGateException;
 import com.partha.airport.baggagerouter.conveyor.layout.Node;
 import com.partha.airport.baggagerouter.conveyor.layout.NodeFactory;
-import org.hibernate.validator.constraints.NotBlank;
+import com.partha.airport.baggagerouter.conveyor.persistence.DepartureRepoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,7 +49,17 @@ public class DepartureList
    private static int DESTINATION_INDEX = 2;
    private static int DEPARTURE_TIME_INDEX = 3;
 
+   @Autowired
+   DepartureRepoService departureRepoService;
 
+
+   /**
+    * This method is meant as an initializer in the context of the exercise.
+    * In a production/real world scenario, we'd likely only have the REST API to add departures, which would be invoked
+    * by another service/ui, whenever a new departure is scheduled at the airport.
+    * @throws IOException
+    * @throws URISyntaxException
+    */
    @PostConstruct
    public void init() throws IOException, URISyntaxException
    {
@@ -59,8 +68,15 @@ public class DepartureList
          LOG.info("Initializing......");
          Files.lines(Paths.get(this.getClass().getClassLoader().getResource(DEPARTURE_LIST_FILE).toURI()))
               .filter(line -> !line.startsWith("#")).map(line -> line.split(" "))
-              .forEach(tokens -> addDeparture(tokens[FLIGHT_ID_INDEX], tokens[FLIGHT_GATE_INDEX],
+              .forEach(tokens -> addDepartureFromFile(tokens[FLIGHT_ID_INDEX], tokens[FLIGHT_GATE_INDEX],
                       tokens[DESTINATION_INDEX], tokens[DEPARTURE_TIME_INDEX]));
+         LOG.info("..... Done");
+
+         LOG.info("Loading from DB");
+         List<DepartureDTO> allDeparturesInDb = departureRepoService.findAll();
+         allDeparturesInDb.stream()
+                 .forEach(departure -> addDeparture(new DepartureDTO(departure.getId(), departure.getFlightGate()
+                         , departure.getDestination(), departure.getDepartureTime())));
          LOG.info("..... Done");
       }
       catch (Exception e)
@@ -70,6 +86,8 @@ public class DepartureList
    }
 
    /**
+    * This is meant to be called only in the context of an initialization for the exercise. It shouldn't be needed in a
+    * real world scenario.
     * @param flightId         flight id
     * @param flightGateName   gate name
     * @param destination      destination airport
@@ -77,10 +95,11 @@ public class DepartureList
     *                         TBD: not dealing with next day flights here
     * @return
     */
-   public boolean addDeparture(String flightId, String flightGateName, String destination, String departureTimeStr)
+   public boolean addDepartureFromFile(String flightId, String flightGateName, String destination, String departureTimeStr)
    {
       LOG.info("Checking departure: {}, {}, {}, {}. Total departures: {}", flightId, flightGateName, destination,
-              departureTimeStr);
+              departureTimeStr, departures
+              .size());
       checkFlightId(flightId);
       checkFlightGate(flightGateName);
       checkDestination(destination);
@@ -90,10 +109,39 @@ public class DepartureList
       Date departureTime = constructFlightDateTime(departureTimeStr);
       Departure departure = new Departure(flightId, flightGate, destination, departureTime);
       departures.put(flightId, departure);
+      Optional<DepartureDTO> departureDTO = departureRepoService.findByFlightId(flightId);
+      departureDTO.orElse(departureRepoService.createOrUpdate(DepartureDTO.convertToDTO(departure)));
       LOG.info("Added departure: {}, {}, {}, {}. Total departures: {}", flightId, flightGateName, destination,
               departureTimeStr, departures
-                      .size());
+              .size());
       return true;
+   }
+
+   /**
+    * This is how I'd expect departures to be added in a real world scenario
+    * @param departureDTO
+    * @return
+    */
+   public boolean addDeparture(DepartureDTO departureDTO)
+   {
+      LOG.info("Checking departure: {}. Total departures: {}", departureDTO, departures.size());
+      boolean isAdded = false;
+      if (null != departureDTO)
+      {
+         checkFlightId(departureDTO.getId());
+         checkFlightGate(departureDTO.getFlightGate());
+         checkDestination(departureDTO.getDestination());
+         checkDepartureTime(departureDTO.getDepartureTime());
+
+         Node flightGate = NodeFactory.getNode(departureDTO.getFlightGate(), true);
+         Departure departure = new Departure(departureDTO.getId(), flightGate, departureDTO
+                 .getDestination(), departureDTO.getDepartureTime());
+         departures.put(departureDTO.getId(), departure);
+         LOG.info("Added departure: {}. Total departures: {}", departureDTO, departures.size());
+         isAdded = true;
+      }
+      LOG.info("Returning: {}", departureDTO);
+      return isAdded;
    }
 
    public Map<String, Departure> getAllDepartures()
@@ -101,9 +149,13 @@ public class DepartureList
       return departures;
    }
 
-   public
-   @NotNull
-   Node findEndNodeByFlightId(String flightId)
+   /**
+    * Finds a destination node given a fligt id
+    *
+    * @param flightId input fligt id
+    * @return node where the given flight is docked
+    */
+   public Node findEndNodeByFlightId(String flightId)
    {
       Node endNode = null;
       checkFlightId(flightId);
@@ -118,6 +170,7 @@ public class DepartureList
          if (departure != null)
          {
             endNode = departure.getFlightGate();
+            // TBD - in a real world application, we'd also check the time
          }
          else
          {
@@ -141,6 +194,15 @@ public class DepartureList
       try
       {
          flightDateTime = DATE_TIME_FORMAT.parse(flightDateTimeStr);
+         // when loading from a file, we only have the time, so it's possible the time specified has already passed
+         // today, so it likely means departure is tomorrow.
+         if(flightDateTime.before(new Date()))
+         {
+            GregorianCalendar gCal = new GregorianCalendar();
+            gCal.setTime(flightDateTime);
+            gCal.add(GregorianCalendar.DATE, 1);
+            flightDateTime = gCal.getTime();
+         }
       }
       catch (ParseException pe)
       {
@@ -195,7 +257,7 @@ public class DepartureList
     * A real world application, we will have business rules for departure times(which are not provided in the exercise)
     * So, just a check for empty & and 24h time format here
     *
-    * @param departureTimeStr Flight gate name
+    * @param departureTimeStr Flight Departure Time
     */
    public static void checkDepartureTime(String departureTimeStr)
    {
@@ -207,6 +269,20 @@ public class DepartureList
       if (!matcher.matches())
       {
          throw new DepartureException("Invalid departure time: [" + departureTimeStr + "]: ");
+      }
+   }
+
+   /**
+    * A real world application, we will have business rules for departure times(which are not provided in the exercise)
+    * So, just a check for empty & and 24h time format here
+    *
+    * @param departureTime Flight Departure Time
+    */
+   public static void checkDepartureTime(Date departureTime)
+   {
+      if (null == departureTime)
+      {
+         throw new DepartureException("Empty departure time: [" + departureTime + "]");
       }
    }
 }

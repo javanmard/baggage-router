@@ -9,4 +9,9 @@ public class ConfigurationException extends RuntimeException
    {
       super(message, t);
    }
+
+   public ConfigurationException(String message)
+   {
+      super(message);
+   }
 }

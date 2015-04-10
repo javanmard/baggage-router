@@ -5,7 +5,7 @@ import com.partha.airport.baggagerouter.conveyor.layout.Node;
 import java.util.Date;
 
 /**
- * Created by psarkar on 4/2/2015.
+ * A pojo that represents a departing flight.
  */
 public class Departure
 {
@@ -16,6 +16,9 @@ public class Departure
    private String destination;
 
    private Date time;
+
+   public Departure()
+   {}
 
    public Departure(String flightId, Node flightGate, String destination, Date tTime)
    {
