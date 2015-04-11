@@ -69,10 +69,10 @@ public class DepartureListTest
       String flightId = "UA12";
       String flightGateSName = "A4";
       String destination = "LAX";
-      String departureTineStr = null;
+      String departureTimeStr = null;
 
       DepartureList departureList = new DepartureList();
-      departureList.addDeparture(flightId, flightGateSName, destination, departureTineStr);
+      departureList.addDeparture(flightId, flightGateSName, destination, departureTimeStr);
    }
 
    @Test(expected = DepartureException.class)
@@ -134,4 +134,4 @@ public class DepartureListTest
       Node departure = departureList.findEndNodeByFlightId(flightId);
       Assert.assertEquals(baggageClaim, departure.getName());
    }
-};
+}

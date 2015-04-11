@@ -34,25 +34,19 @@ public class BaggageServiceImplTest
       @Bean
       public BaggageRouterService baggageRouterService()
       {
-         BaggageRouterService baggageRouterService = new BaggageRouterServiceImpl();
-         // set properties, etc.
-         return baggageRouterService;
+         return new BaggageRouterServiceImpl();
       }
 
       @Bean
       public DepartureList departureList()
       {
-         DepartureList departureList = new DepartureList();
-         // set properties, etc.
-         return departureList;
+         return new DepartureList();
       }
 
       @Bean
       public Network network()
       {
-         Network network = new Network();
-         // set properties, etc.
-         return network;
+         return new Network();
       }
    }
 
@@ -97,7 +91,7 @@ public class BaggageServiceImplTest
    {
       String sourceName = "A111";
       String flightId = "UA10";
-      List<NodeDTO> shortestPathDTO = baggageRouterService.findShortestPath(sourceName, flightId);
+      baggageRouterService.findShortestPath(sourceName, flightId);
    }
 
    @Test
@@ -114,6 +108,6 @@ public class BaggageServiceImplTest
    {
       String sourceName = "A10";
       String flightId = "UA111";
-      List<NodeDTO> shortestPathDTO = baggageRouterService.findShortestPath(sourceName, flightId);
+      baggageRouterService.findShortestPath(sourceName, flightId);
    }
 }

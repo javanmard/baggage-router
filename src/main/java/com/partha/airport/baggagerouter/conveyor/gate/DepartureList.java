@@ -43,7 +43,6 @@ public class DepartureList
    private static final SimpleDateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
    private static final String TIME_FORMAT_24H = "([01]?[0-9]|2[0-3]):[0-5][0-9]";
    private static Pattern timeFormatPattern = Pattern.compile(TIME_FORMAT_24H);
-   private static Matcher matcher;
 
    private static int FLIGHT_ID_INDEX = 0;
    private static int FLIGHT_GATE_INDEX = 1;
@@ -93,7 +92,7 @@ public class DepartureList
     * @param destination      destination airport
     * @param departureTimeStr time (only - hh24:mi) of the departure, on the current date
     *                         TBD: not dealing with next day flights here
-    * @return
+    * @return true if departure added (return only needed to be added to satisfy the usage in the lambda in init)
     */
    public boolean addDeparture(String flightId, String flightGateName, String destination, String departureTimeStr)
    {
@@ -119,8 +118,8 @@ public class DepartureList
    /**
     * This is how I'd expect departures to be added in a real world scenario, called from the REST API
     *
-    * @param departureDTO
-    * @return
+    * @param departureDTO DTO containing the details of the departure to be added.
+    * @return true if added.
     */
    public boolean addDeparture(DepartureDTO departureDTO)
    {
@@ -186,7 +185,7 @@ public class DepartureList
       Date now = new Date();
       String todayString = DATE_FORMAT.format(now);
 
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       sb.append(todayString).append(" ").append(flightTime);
       String flightDateTimeStr = sb.toString();
 
@@ -265,7 +264,7 @@ public class DepartureList
       {
          throw new DepartureException("Empty departure time: [" + departureTimeStr + "]");
       }
-      matcher = timeFormatPattern.matcher(departureTimeStr);
+      Matcher matcher = timeFormatPattern.matcher(departureTimeStr);
       if (!matcher.matches())
       {
          throw new DepartureException("Invalid departure time: [" + departureTimeStr + "]: ");
@@ -282,7 +281,7 @@ public class DepartureList
    {
       if (null == departureTime)
       {
-         throw new DepartureException("Empty departure time: [" + departureTime + "]");
+         throw new DepartureException("Empty departure time: null]");
       }
    }
 }

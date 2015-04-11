@@ -56,7 +56,7 @@ public class Network
    }
 
    /**
-    * Adds a conveyor segment. This is meant to bea used only during initializatio
+    * Adds a conveyor segment. This is meant to bea used only during initialization
     * @param node1Name node name
     * @param node2Name node name
     * @param travelTime travel time between node1 & node2
@@ -79,7 +79,7 @@ public class Network
 
    /**
     * In a real world application, maybe we'd have better validations requirements. Here, just a check for 0 or less.
-    * @param travelTime
+    * @param travelTime travel time to validate
     */
    private static void checkTravelTime(int travelTime)
    {
@@ -113,7 +113,7 @@ public class Network
    {
       if(node == null)
       {
-         throw new UnknownNodeException("Node not found: " + node);
+         throw new UnknownNodeException("Node is null");
       }
       NodeFactory.getNode(node.getName(), false);
    }

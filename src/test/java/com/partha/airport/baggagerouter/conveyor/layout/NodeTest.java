@@ -1,12 +1,7 @@
 package com.partha.airport.baggagerouter.conveyor.layout;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by psarkar on 4/3/2015.

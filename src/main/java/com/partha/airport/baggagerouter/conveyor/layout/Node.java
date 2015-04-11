@@ -1,5 +1,6 @@
 package com.partha.airport.baggagerouter.conveyor.layout;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class Node implements Comparable<Node>
     * @return whether this node is shorter than the other one, when travelling from the source node.
     */
    @Override
-   public int compareTo(Node otherNode)
+   public int compareTo(@NotNull Node otherNode)
    {
       return Integer.compare(minTravelTime, otherNode.minTravelTime);
    }
